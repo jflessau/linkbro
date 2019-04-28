@@ -23,7 +23,7 @@ $ linkbro -url https://example.com -n 42 -l 500 -a -s
 | -s     | boolean | yes      | false   | slim summary (show broken links only) |
 
 
-## Hints
+### Hints
 Without the `-a` flag, only links on the specified page are checked. For example:
 ```
 $ linkbro -url https://example.com
@@ -36,7 +36,7 @@ will also check all links discovered by hopping from link to link within the dom
 
 
 ## Example
-`linkbro -url example.com -n 10` will deliver: the following output:
+`linkbro -url example.com -n 10` will deliver the following output:
 ```
 ------------
 url:          https://example.com
