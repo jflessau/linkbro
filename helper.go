@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/op/go-logging"
 	"net/http"
@@ -9,6 +10,32 @@ import (
 
 func (r Redacted) Redacted() interface{} {
 	return logging.Redact(string(r))
+}
+
+func checkInput(args LoopCheckArgs) (LoopCheckArgs, error) {
+	if args.Max == 0 {
+		return args, errors.New("please set n > 1")
+	}
+	if args.Url == "" {
+		return args, errors.New("Please specify an url by using the -url flag")
+	}
+	if !testUrl(args.Url) {
+		return args, errors.New("Fetch failed. Don’t forget to specify the protocol: http:// or https://")
+	}
+
+	log.Notice("------------")
+	if args.Max > 1000 {
+		oldN := args.Max
+		args.Max = 1000
+		log.Warningf("Max Link amount was set to %d. %d is a bit too much, huh?", args.Max, oldN)
+	}
+	if args.Lat < 250 {
+		oldLat := args.Lat
+		args.Lat = 250
+		log.Warningf("Latency was set to %dms. %dms is a bit dangerous, huh?", args.Lat, oldLat)
+	}
+
+	return args, nil
 }
 
 func setLinkProps(l Link, list []Link, statusCode int, checkStatus, checkPage bool) []Link {
@@ -100,17 +127,30 @@ func showProgress(list []Link) {
 	log.Info((fmt.Sprintf("\r\r(%d of %d links checked)", done, n)))
 }
 
-func printResult(list []Link) {
+func printResult(list []Link, args LoopCheckArgs) {
+	var ok, notSure, notOk int
 	for n, l := range list {
 		switch l.StatusCode {
 		case 200:
+			ok++
+			if args.Slim {
+				break
+			}
 			log.Infof("%d: ok: %s ---> %s", (n + 1), l.Origin, l.Href)
 		case 0:
+			notSure++
 			log.Noticef("%d: not sure: %s ---> %s", (n + 1), l.Origin, l.Href)
 		default:
+			notOk++
 			log.Warningf("%d: not ok: %s ---> %s", (n + 1), l.Origin, l.Href)
 		}
 	}
+
+	log.Notice("\n------------\nSUMMARY")
+	log.Infof("ok:       %d", ok)
+	log.Noticef("not sure: %d", notSure)
+	log.Warningf("not ok:   %d", notOk)
+	log.Notice("------------\n")
 }
 
 func testUrl(url string) bool {

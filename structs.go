@@ -9,3 +9,12 @@ type Link struct {
 	StatusCode  int
 	Origin      string
 }
+
+type LoopCheckArgs struct {
+	Url  string
+	All  bool
+	Num  int
+	Max  int
+	Lat  int
+	Slim bool
+}

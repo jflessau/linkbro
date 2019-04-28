@@ -6,9 +6,9 @@ import (
 	"time"
 )
 
-func checkLoop(list []Link, url string, all bool, n int, max int, lat int) ([]Link, string, bool, int, int, int) {
+func checkLoop(list []Link, args LoopCheckArgs) ([]Link, LoopCheckArgs) {
 	showProgress(list)
-	time.Sleep(time.Duration(lat) * time.Millisecond)
+	time.Sleep(time.Duration(args.Lat) * time.Millisecond)
 
 	// get link from list to check
 	var l = Link{CheckStatus: false, CheckPage: false}
@@ -21,13 +21,13 @@ func checkLoop(list []Link, url string, all bool, n int, max int, lat int) ([]Li
 
 	// end if no links to check are left
 	if !l.CheckStatus {
-		return list, url, all, n, max, lat
+		return list, args
 	}
 
 	// catch mailto links
 	if isMailTo(l.Href) {
 		list = setLinkProps(l, list, 0, false, false)
-		return checkLoop(list, url, all, n, max, lat)
+		return checkLoop(list, args)
 	}
 
 	// fetch page
@@ -35,14 +35,14 @@ func checkLoop(list []Link, url string, all bool, n int, max int, lat int) ([]Li
 	if err != nil {
 		log.Warning(err)
 		list = setLinkProps(l, list, 0, false, false)
-		return checkLoop(list, url, all, n, max, lat)
+		return checkLoop(list, args)
 	}
 	StatusCode := res.StatusCode
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
 		log.Warning("reading DOM failed")
 		list = setLinkProps(l, list, StatusCode, false, false)
-		return checkLoop(list, url, all, n, max, lat)
+		return checkLoop(list, args)
 	}
 	defer res.Body.Close()
 
@@ -50,13 +50,13 @@ func checkLoop(list []Link, url string, all bool, n int, max int, lat int) ([]Li
 	if StatusCode != 200 {
 		log.Notice("non 200 at", l.Href)
 		list = setLinkProps(l, list, StatusCode, false, false)
-		return checkLoop(list, url, all, n, max, lat)
+		return checkLoop(list, args)
 	}
 
 	// start over with next link if current one is not on the specified domain
 	if !l.CheckPage {
 		list = setLinkProps(l, list, 200, false, false)
-		return checkLoop(list, url, all, n, max, lat)
+		return checkLoop(list, args)
 	}
 
 	// mark link as fully checked
@@ -65,16 +65,16 @@ func checkLoop(list []Link, url string, all bool, n int, max int, lat int) ([]Li
 	// add links on page to list
 	doc.Find("a").Each(func(i int, s *goquery.Selection) {
 		href, ok := s.Attr("href")
-		if ok && !isOnList(prepareHref(href, l.Href, url), list) && (all || url == l.Href) && n < (max-1) {
-			n++
+		if ok && !isOnList(prepareHref(href, l.Href, args.Url), list) && (args.All || args.Url == l.Href) && args.Num < (args.Max-1) {
+			args.Num++
 			list = append(list, Link{
-				Href:        prepareHref(href, l.Href, url),
+				Href:        prepareHref(href, l.Href, args.Url),
 				CheckStatus: true,
-				CheckPage:   sameDomain(prepareHref(href, l.Href, url), url),
+				CheckPage:   sameDomain(prepareHref(href, l.Href, args.Url), args.Url),
 				StatusCode:  0,
 				Origin:      l.Href})
 		}
 	})
 
-	return checkLoop(list, url, all, n, max, lat)
+	return checkLoop(list, args)
 }
