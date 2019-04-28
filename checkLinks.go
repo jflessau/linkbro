@@ -30,7 +30,7 @@ func checkLoop(list []Link, args LoopCheckArgs) ([]Link, LoopCheckArgs) {
 		return checkLoop(list, args)
 	}
 
-	// fetch page
+	// request page
 	res, err := http.Get(l.Href)
 	if err != nil {
 		log.Warning(err)

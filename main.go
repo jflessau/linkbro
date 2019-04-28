@@ -20,7 +20,7 @@ func main() {
 	slim := flag.Bool("s", false, "scan entire domain")
 	url := flag.String("url", "", "domain to perform a check on")
 	n := flag.Int("n", 50, "amount of links to check")
-	lat := flag.Int("l", 1000, "time [ms] to wait between fetches")
+	lat := flag.Int("l", 1000, "time [ms] to wait between requests")
 	flag.Parse()
 
 	args := LoopCheckArgs{
