@@ -18,8 +18,8 @@ $ linkbro -url https://example.com -n 42 -l 500 -a -s
 |:------ |:------- | -------- | ------- | ------------------------------------- |
 | -url   | string  | no       | -       | url to start checks on                |
 | -n     | integer | yes      | 50      | max number of links to check          |
-| -l     | integer | yes      | 1000    | latency between requests              |
-| -a     | boolean | yes      | false   | check all links on a domain             |
+| -l     | integer | yes      | 1000    | latency [ms] between requests         |
+| -a     | boolean | yes      | false   | check all links on a domain           |
 | -s     | boolean | yes      | false   | slim summary (show broken links only) |
 
 
