@@ -1,11 +1,11 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"github.com/op/go-logging"
-	"net/http"
+	"errors"
 	"strings"
+	"net/http"
+	"github.com/op/go-logging"
 )
 
 func (r Redacted) Redacted() interface{} {
@@ -77,31 +77,19 @@ func getDomain(url string, protocol bool) string {
 	url = strings.Replace(url, "https://", "", -1)
 
 	var offset, end int
-	if strings.Index(url, "//") >= 0 {
-		offset = 2
-	}
+	if strings.Index(url, "//") >= 0 { offset = 2 }
 	urlCut := strings.Replace(url, "//", "", -1)
 	end = strings.Index(urlCut, "/")
-	if end >= 0 {
-		return protocolStr + string(url[0:(end+offset)])
-	}
+	if end >= 0 { return protocolStr + string(url[0:(end+offset)]) }
 
 	return protocolStr + url
 }
 
 func prepareHref(href, originHref, url string) string {
-	if sameDomain(href, url) {
-		return href
-	}
-	if len(href) < 1 {
-		return originHref
-	}
-	if string(href[0]) == "/" {
-		return getDomain(url, true) + href
-	}
-	if string(href[0]) == "#" {
-		return originHref + addSlash(originHref) + href
-	}
+	if sameDomain(href, url) { return href }
+	if len(href) < 1 { return originHref }
+	if string(href[0]) == "/" { return getDomain(url, true) + href }
+	if string(href[0]) == "#" { return originHref + addSlash(originHref) + href }
 	return href
 }
 

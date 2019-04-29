@@ -1,9 +1,9 @@
 package main
 
 import (
+	"os"
 	"flag"
 	"github.com/op/go-logging"
-	"os"
 )
 
 var log = logging.MustGetLogger("")

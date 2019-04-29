@@ -20,9 +20,7 @@ func checkLoop(list []Link, args LoopCheckArgs) ([]Link, LoopCheckArgs) {
 	}
 
 	// end if no links to check are left
-	if !l.CheckStatus {
-		return list, args
-	}
+	if !l.CheckStatus { return list, args }
 
 	// catch mailto links
 	if isMailTo(l.Href) {
@@ -53,14 +51,11 @@ func checkLoop(list []Link, args LoopCheckArgs) ([]Link, LoopCheckArgs) {
 		return checkLoop(list, args)
 	}
 
-	// start over with next link if current one is not on the specified domain
-	if !l.CheckPage {
-		list = setLinkProps(l, list, 200, false, false)
-		return checkLoop(list, args)
-	}
-
-	// mark link as fully checked
+	// mark link as checked
 	list = setLinkProps(l, list, StatusCode, false, false)
+
+	// switch to next link if current one is no internal link
+	if !l.CheckPage { return checkLoop(list, args) }
 
 	// add links on page to list
 	doc.Find("a").Each(func(i int, s *goquery.Selection) {
